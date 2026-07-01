@@ -256,6 +256,8 @@ let currentIdx  = 0;
 let placed      = [];
 let completedLines = [];
 let completedWC = 0;
+let tryCount    = 0;
+let answerSeen  = false;
 
 
 function shuffle(arr){ let a=[...arr]; for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
@@ -330,6 +332,8 @@ function renderSentence(){
       </div>
     </div>`;
   placed = [];
+  tryCount   = 0;
+  answerSeen = false;
   updateProgress();
   renderTabs();
   attachEvents();
@@ -448,7 +452,8 @@ function checkSentence(){
   if(words.length===0){ setHint('Click some words to build your sentence first!','info'); return; }
   const correct=words.length===answer.length && words.every((w,i)=>w===answer[i]);
   if(correct){
-    setHint('⭐ Well done! That sentence is correct!','right');
+    const emoji = answerSeen ? '✅ Good effort! You got it right.' : '⭐ Well done! That sentence is correct!';
+    setHint(emoji,'right');
     const line=words.join(' ').replace(/ ([,\.!?])/g,'$1').replace(/ '/g,"'").replace(/ —/g,'—');
     completedLines[currentIdx]=line;
     completedWC=completedLines.filter(Boolean).reduce((s,l)=>s+l.split(' ').length,0);
@@ -456,10 +461,52 @@ function checkSentence(){
     updateProgress();
     setTimeout(()=>{ currentIdx++; placed=[]; renderSentence(); },950);
   } else {
-    if(words.length<answer.length) setHint(`Not quite — you still need ${answer.length-words.length} more word(s).`,'wrong');
-    else if(words.length>answer.length) setHint('Too many words — try removing some.','wrong');
-    else { const f=words.findIndex((w,i)=>w!==answer[i]); setHint(`Check word ${f+1} — something is not right there. Try again!`,'wrong'); }
+    tryCount++;
+    // build feedback message
+    let msg='';
+    if(words.length<answer.length) msg=`Not quite — you still need ${answer.length-words.length} more word(s).`;
+    else if(words.length>answer.length) msg='Too many words — try removing some.';
+    else { const f=words.findIndex((w,i)=>w!==answer[i]); msg=`Check word ${f+1} — something is not right there. Try again!`; }
+    // after 3 wrong tries show the See Answer button (only once)
+    if(tryCount>=3 && !answerSeen){
+      setHint(msg + '  (3 tries used — you can now see the answer below.)','wrong');
+      showSeeAnswerBtn();
+    } else if(answerSeen){
+      setHint(msg,'wrong');
+    } else {
+      const left = 3-tryCount;
+      setHint(msg + (left>0 ? ` (${left} tr${left===1?'y':'ies'} left)` : ''),'wrong');
+    }
   }
+}
+
+function showSeeAnswerBtn(){
+  // only add the button once
+  if(document.getElementById('see-answer-btn')) return;
+  const btnRow = document.querySelector('.btn-row');
+  const btn = document.createElement('button');
+  btn.id = 'see-answer-btn';
+  btn.className = 'btn';
+  btn.style.borderColor = '#E8A020';
+  btn.style.color = '#854F0B';
+  btn.textContent = '👁 See Answer';
+  btn.onclick = revealAnswer;
+  btnRow.appendChild(btn);
+}
+
+function revealAnswer(){
+  answerSeen = true;
+  const answer = activeStory.sentences[currentIdx].answer;
+  // show the answer sentence in the hint area
+  const line = answer.join(' ').replace(/ ([,\.!?])/g,'$1').replace(/ '/g,"'").replace(/ —/g,'—');
+  const h = document.getElementById('hint-box');
+  h.className = 'hint-box info';
+  h.innerHTML = `<span><strong>Answer:</strong> <em>${line}</em><br><span style="font-size:12px; color:#888;">Now arrange the words correctly to move on.</span></span>`;
+  // remove the See Answer button
+  const btn = document.getElementById('see-answer-btn');
+  if(btn) btn.remove();
+  // reset drop zone so student arranges again
+  clearDZ();
 }
 
 // ── STORY PREVIEW ─────────────────────────────────────────────────────────────
