@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Story Builder — Easy</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: #FFF8F0; color: #1a1a2e; min-height: 100vh; padding: 0 0 60px; }
+
+  .picker-hero { background: linear-gradient(135deg, #FF6B6B 0%, #FFD93D 50%, #6BCB77 100%); padding: 40px 24px 32px; text-align: center; }
+  .picker-hero h1 { font-size: 42px; font-weight: 900; color: #fff; text-shadow: 3px 3px 0 rgba(0,0,0,0.15); margin-bottom: 6px; }
+  .picker-hero p  { font-size: 18px; color: rgba(255,255,255,0.92); font-weight: 600; }
+  .easy-badge { display:inline-block; background:#fff; color:#FF6B6B; font-size:14px; font-weight:800; padding:4px 14px; border-radius:20px; margin-top:10px; letter-spacing:0.04em; }
+
+  .picker-body { max-width: 860px; margin: 0 auto; padding: 32px 16px; }
+  .picker-body h2 { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+  .picker-body > p { font-size: 16px; color: #666; margin-bottom: 24px; font-weight: 600; }
+
+  .story-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .story-card-btn { background: #fff; border: 3px solid #e0e4ea; border-radius: 20px; cursor: pointer; text-align: left; overflow: hidden; transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s; font-family: inherit; padding: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+  .story-card-btn:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 12px 32px rgba(0,0,0,0.14); border-color: #FFD93D; }
+  .story-card-img { width: 100%; height: 160px; object-fit: cover; display: block; background: #eee; display:flex; align-items:center; justify-content:center; font-size:72px; }
+  .story-card-body { padding: 16px 18px 18px; }
+  .story-card-btn h3 { font-size: 20px; font-weight: 800; margin-bottom: 5px; }
+  .story-card-btn p  { font-size: 15px; color: #777; line-height: 1.5; font-weight: 600; }
+  .story-card-tag { display: inline-block; font-size: 12px; padding: 4px 11px; border-radius: 20px; background: #FFF3CD; color: #856404; margin-top: 10px; font-weight: 700; border: 1.5px solid #FFD93D; }
+
+  .game-header { position: relative; overflow: hidden; min-height: 140px; display: flex; align-items: flex-end; }
+  .game-header-bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(0.55); }
+  .game-header-overlay { position: relative; z-index: 1; width: 100%; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .game-header-left { display: flex; align-items: center; gap: 12px; }
+  .game-header-icon  { font-size: 36px; }
+  .game-header-title { font-size: 24px; font-weight: 900; color: #fff; text-shadow: 2px 2px 0 rgba(0,0,0,0.3); }
+  .game-header-sub   { font-size: 14px; color: rgba(255,255,255,0.85); font-weight: 600; margin-top: 2px; }
+  .back-btn { background: rgba(255,255,255,0.22); border: 2px solid rgba(255,255,255,0.5); color: #fff; border-radius: 10px; padding: 8px 16px; font-size: 14px; cursor: pointer; font-family: inherit; font-weight: 700; white-space: nowrap; }
+  .back-btn:hover { background: rgba(255,255,255,0.35); }
+
+  .progress-wrap { background: #fff; border-bottom: 2px solid #f0f0f0; padding: 12px 24px; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 16px; color: #555; margin-bottom: 6px; font-weight: 700; }
+  .bar-bg   { height: 10px; border-radius: 5px; background: #f0f0f0; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg,#FF6B6B,#FFD93D,#6BCB77); transition: width 0.4s ease; }
+
+  .container { max-width: 780px; margin: 0 auto; padding: 0 16px; }
+
+  .stage-tabs { display: flex; gap: 8px; flex-wrap: wrap; padding: 16px 0 0; }
+  .stage-tab { padding: 8px 18px; border-radius: 20px; font-size: 16px; border: 2.5px solid #ddd; background: #fff; color: #666; cursor: pointer; transition: all 0.15s; font-family: inherit; font-weight: 700; }
+  .stage-tab.active { background: #FF6B6B; border-color: #FF6B6B; color: #fff; }
+  .stage-tab.done   { background: #E8F8EE; border-color: #6BCB77; color: #1a7a3a; }
+  .stage-tab:disabled { opacity: 0.38; cursor: default; }
+
+  .main-card { background: #fff; border: 2.5px solid #eee; border-radius: 20px; padding: 22px; margin-top: 16px; box-shadow: 0 4px 18px rgba(0,0,0,0.06); }
+  .prompt-strip { background: linear-gradient(135deg,#FFF3CD,#FFF8E1); border-left: 5px solid #FFD93D; border-radius: 0 12px 12px 0; padding: 12px 16px; margin-bottom: 16px; font-size: 19px; color: #5a3e00; font-weight: 700; }
+  .section-label { font-size: 13px; color: #aaa; margin-bottom: 8px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .tile-bank { display: flex; flex-wrap: wrap; min-height: 52px; margin-bottom: 14px; }
+  .tile { display: inline-flex; align-items: center; padding: 10px 20px; margin: 5px; border-radius: 30px; font-size: 22px; cursor: pointer; font-weight: 700; border: 2.5px solid #D0D7E0; background: #fff; color: #1a1a2e; user-select: none; transition: opacity 0.15s, transform 0.12s, box-shadow 0.12s; font-family: inherit; box-shadow: 0 2px 6px rgba(0,0,0,0.07); }
+  .tile:hover:not(.used) { transform: scale(1.08) translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.13); border-color: #FF6B6B; color: #FF6B6B; }
+  .tile:active:not(.used) { transform: scale(0.96); }
+  .tile.used { opacity: 0.18; pointer-events: none; }
+
+  .drop-zone { min-height: 70px; border: 3px dashed #D0D7E0; border-radius: 14px; padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; background: #FAFBFC; transition: background 0.15s, border-color 0.15s; }
+  .drop-zone.over { background: #FFF3CD; border-color: #FFD93D; }
+  .drop-zone-empty { font-size: 17px; color: #C0C8D0; font-style: italic; font-weight: 600; }
+  .placed-tile { display: inline-flex; align-items: center; padding: 10px 20px; margin: 4px; border-radius: 30px; font-size: 22px; cursor: pointer; font-weight: 700; background: #6BCB77; border: 2.5px solid #4aaa55; color: #fff; font-family: inherit; transition: opacity 0.15s, transform 0.1s; box-shadow: 0 2px 8px rgba(107,203,119,0.3); }
+  .placed-tile:hover { opacity: 0.75; transform: scale(0.96); }
+  .placed-tile.dz-over { border-color: #FFD93D; box-shadow: -4px 0 0 #FFD93D; transform: translateX(4px); }
+
+  .hint-box { font-size: 17px; padding: 11px 15px; border-radius: 10px; min-height: 40px; display: flex; align-items: center; gap: 8px; margin-top: 10px; font-weight: 700; }
+  .hint-box.info  { background: #F5F7FA; color: #666; border: 2px solid #E8ECF0; }
+  .hint-box.right { background: #E8F8EE; color: #1a7a3a; border: 2px solid #6BCB77; }
+  .hint-box.wrong { background: #FFF0F0; color: #c0392b; border: 2px solid #FF6B6B; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .btn { padding: 12px 28px; border-radius: 12px; border: 2.5px solid #D0D7E0; background: #fff; color: #333; font-size: 18px; cursor: pointer; font-family: inherit; font-weight: 800; transition: background 0.15s, transform 0.1s; }
+  .btn:hover  { background: #F5F7FA; }
+  .btn:active { transform: scale(0.97); }
+  .btn.primary { background: #FF6B6B; border-color: #FF6B6B; color: #fff; box-shadow: 0 4px 14px rgba(255,107,107,0.35); }
+  .btn.primary:hover { background: #e05555; }
+
+  .story-section { margin-top: 28px; }
+  .story-preview { background: #fff; border: 2.5px solid #eee; border-radius: 16px; padding: 20px 22px; font-size: 20px; line-height: 2.1; color: #1a1a2e; min-height: 66px; box-shadow: 0 4px 18px rgba(0,0,0,0.05); font-weight: 600; }
+  .story-para { margin-bottom: 16px; }
+  .story-para:last-child { margin-bottom: 0; }
+  .para-label { display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 11px; border-radius: 20px; margin-bottom: 6px; }
+  .para-label.s0 { background: #E6F1FB; color: #185FA5; }
+  .para-label.s1 { background: #FFF3CD; color: #856404; }
+  .para-label.s2 { background: #FFF0F0; color: #c0392b; }
+  .para-label.s3 { background: #E8F8EE; color: #1a7a3a; }
+  .wc-note { font-size: 13px; color: #bbb; margin-top: 10px; text-align: right; font-weight: 700; }
+
+  .complete-banner { background: linear-gradient(135deg,#6BCB77,#4aaa55); border-radius: 16px; padding: 28px 24px; text-align: center; margin-top: 16px; box-shadow: 0 6px 24px rgba(107,203,119,0.3); }
+  .complete-banner h2 { font-size: 28px; color: #fff; margin-bottom: 8px; font-weight: 900; }
+  .complete-banner p  { font-size: 18px; color: rgba(255,255,255,0.9); font-weight: 700; }
+
+  @media (max-width: 520px) {
+    .picker-hero h1 { font-size: 30px; }
+    .tile, .placed-tile { font-size: 19px; padding: 8px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="picker-screen">
+  <div class="picker-hero">
+    <div style="font-size:52px; margin-bottom:10px;">📖✨</div>
+    <h1>Story Builder</h1>
+    <p>Choose a story and put the words in order!</p>
+    <span class="easy-badge">⭐ Easy Version</span>
+  </div>
+  <div class="picker-body">
+    <h2>Which story do you want to build? 🎯</h2>
+    <p>Click on a story card to begin.</p>
+    <div id="level-banner" style="margin-bottom:20px; background:#FFF3CD; border:2px solid #FFD93D; border-radius:14px; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+      <div>
+        <p style="font-size:16px; font-weight:800; color:#5a3e00; margin:0;">⭐ You are on the Easy level</p>
+        <p style="font-size:14px; color:#856404; margin:4px 0 0; font-weight:600;">Ready for a challenge? Try the Intermediate stories!</p>
+      </div>
+      <button id="level-toggle-btn" onclick="askLevelSwitch()" style="padding:10px 22px; border-radius:10px; border:2.5px solid #FF6B6B; background:#FF6B6B; color:#fff; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; white-space:nowrap;">🚀 Intermediate</button>
+    </div>
+    <div class="story-cards">
+      <button class="story-card-btn" onclick="startStory(0)">
+        <div class="story-card-img">🌧️🐶</div>
+        <div class="story-card-body">
+          <h3>Faris's Best Saturday</h3>
+          <p>Faris finds a dog in trouble. Can he help it?</p>
+          <span class="story-card-tag">24–25 sentences · easy words</span>
+        </div>
+      </button>
+      <button class="story-card-btn" onclick="startStory(1)">
+        <div class="story-card-img">🎒🐹</div>
+        <div class="story-card-body">
+          <h3>The Wrong Bag</h3>
+          <p>Vera picks up the wrong bag. What is inside?</p>
+          <span class="story-card-tag">24–25 sentences · easy words</span>
+        </div>
+      </button>
+      <button class="story-card-btn" onclick="startStory(2)">
+        <div class="story-card-img">🔦😱</div>
+        <div class="story-card-body">
+          <h3>Blackout</h3>
+          <p>The lights go out at school. What will Jaden do?</p>
+          <span class="story-card-tag">24–25 sentences · easy words</span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="game-screen" style="display:none;">
+  <div class="game-header">
+    <div class="game-header-bg" id="game-header-bg" style="background:#1D9E75;"></div>
+    <div class="game-header-overlay">
+      <div class="game-header-left">
+        <div class="game-header-icon" id="hdr-icon">📖</div>
+        <div>
+          <div class="game-header-title" id="hdr-title">Story Builder</div>
+          <div class="game-header-sub" id="hdr-sub"></div>
+        </div>
+      </div>
+      <button class="back-btn" onclick="goBack()">← Pick another story</button>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="container">
+      <div class="progress-meta">
+        <span id="progress-label">Sentence 1 of 12</span>
+        <span id="wc-label">Words: 0</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" id="bar-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="stage-tabs" id="stage-tabs"></div>
+    <div id="main-area"></div>
+    <div class="story-section">
+      <p class="section-label">📜 Your story so far</p>
+      <div class="story-preview" id="story-preview"><em style="color:#ccc;">Your story will appear here...</em></div>
+      <p class="wc-note" id="wc-note"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+const STAGES = [
+  { name:"🌅 Beginning", prompt:"Where are we? Who is the main character?" },
+  { name:"⚡ Build-up",  prompt:"Something happens. What does the character notice?" },
+  { name:"🔥 Climax",    prompt:"The exciting part! What does the character do?" },
+  { name:"🌤️ Resolution",prompt:"How does the story end?" },
+];
+
+const INTER_STORIES = [
+  // ── STORY 0: Faris's Best Saturday ──────────────────────────────────────────
+  {
+    icon:"🌧️", title:"Faris's Best Saturday", bgImage:"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgMzQwIj4KICA8cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjM0MCIgZmlsbD0iI0U4RjRGRCIvPgogIDxyZWN0IHg9IjAiIHk9IjIwMCIgd2lkdGg9IjYwMCIgaGVpZ2h0PSIxNDAiIGZpbGw9IiM4QjY5MTQiLz4KICA8cmVjdCB4PSIwIiB5PSIxOTUiIHdpZHRoPSI2MDAiIGhlaWdodD0iMTgiIGZpbGw9IiNBMDc4MjAiLz4KICA8cmVjdCB4PSI2MCIgeT0iNjAiIHdpZHRoPSI0ODAiIGhlaWdodD0iMTYwIiBmaWxsPSIjQjhENEYwIiByeD0iOCIvPgogIDxyZWN0IHg9IjYwIiB5PSI2MCIgd2lkdGg9IjQ4MCIgaGVpZ2h0PSIxNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzVCOEZDOSIgc3Ryb2tlLXdpZHRoPSI2IiByeD0iOCIvPgogIDxsaW5lIHgxPSIzMDAiIHkxPSI2MCIgeDI9IjMwMCIgeTI9IjIyMCIgc3Ryb2tlPSIjNUI4RkM5IiBzdHJva2Utd2lkdGg9IjUiLz4KICA8bGluZSB4MT0iNjAiIHkxPSIxNDAiIHgyPSI1NDAiIHkyPSIxNDAiIHN0cm9rZT0iIzVCOEZDOSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPGxpbmUgeDE9IjkwIiB5MT0iODAiIHgyPSI5MCIgeTI9IjIxNSIgc3Ryb2tlPSIjNGE3YWI1IiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNCIvPgogIDxsaW5lIHgxPSIxMjAiIHkxPSI4MCIgeDI9IjEyMCIgeTI9IjIxNSIgc3Ryb2tlPSIjNGE3YWI1IiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNCIvPgogIDxsaW5lIHgxPSIxNTAiIHkxPSI4MCIgeDI9IjE1MCIgeTI9IjIxNSIgc3Ryb2tlPSIjNGE3YWI1IiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNCIvPgogIDxsaW5lIHgxPSIzMzAiIHkxPSI4MCIgeDI9IjMzMCIgeTI9IjIxNSIgc3Ryb2tlPSIjNGE3YWI1IiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNCIvPgogIDxsaW5lIHgxPSIzNjAiIHkxPSI4MCIgeDI9IjM2MCIgeTI9IjIxNSIgc3Ryb2tlPSIjNGE3YWI1IiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNCIvPgogIDxsaW5lIHgxPSIzOTAiIHkxPSI4MCIgeDI9IjM5MCIgeTI9IjIxNSIgc3Ryb2tlPSIjNGE3YWI1IiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNCIvPgogIDxlbGxpcHNlIGN4PSIxNjUiIGN5PSIxNzAiIHJ4PSIzNiIgcnk9IjIyIiBmaWxsPSIjQzg5MDRBIi8+CiAgPGVsbGlwc2UgY3g9IjE1NSIgY3k9IjE2MiIgcng9IjEyIiByeT0iMTAiIGZpbGw9IiNDODkwNEEiLz4KICA8Y2lyY2xlIGN4PSIxNTEiIGN5PSIxNTkiIHI9IjMiIGZpbGw9IiMyYTE4MDAiLz4KICA8ZWxsaXBzZSBjeD0iMTU1IiBjeT0iMTY2IiByeD0iNyIgcnk9IjQiIGZpbGw9IiNlOGIwNmEiLz4KICA8ZWxsaXBzZSBjeD0iMTY1IiBjeT0iMTg1IiByeD0iOCIgcnk9IjUiIGZpbGw9IiNiMDcwMzAiIG9wYWNpdHk9IjAuNyIvPgogIDxlbGxpcHNlIGN4PSIxNzgiIGN5PSIxODciIHJ4PSI3IiByeT0iNSIgZmlsbD0iI2IwNzAzMCIgb3BhY2l0eT0iMC43Ii8+CiAgPHBhdGggZD0iTTE0OCAxNjggUTE1MiAxNzIgMTU2IDE2OCIgc3Ryb2tlPSIjOEI0NTEzIiBzdHJva2Utd2lkdGg9IjEuNSIgZmlsbD0ibm9uZSIvPgogIDxlbGxpcHNlIGN4PSI0MzAiIGN5PSIxMzAiIHJ4PSIyOCIgcnk9IjM0IiBmaWxsPSIjRkZEMEEwIi8+CiAgPGVsbGlwc2UgY3g9IjQxOCIgY3k9IjExMCIgcng9IjE0IiByeT0iMTYiIGZpbGw9IiNGRkQwQTAiLz4KICA8ZWxsaXBzZSBjeD0iNDE0IiBjeT0iMTA0IiByeD0iNSIgcnk9IjciIGZpbGw9IiNGRkFBNzAiLz4KICA8ZWxsaXBzZSBjeD0iNDI0IiBjeT0iMTA0IiByeD0iNSIgcnk9IjciIGZpbGw9IiNGRkFBNzAiLz4KICA8Y2lyY2xlIGN4PSI0MTQiIGN5PSIxMDgiIHI9IjIuNSIgZmlsbD0iIzJhMWEwYSIvPgogIDxjaXJjbGUgY3g9IjQyMiIgY3k9IjEwOCIgcj0iMi41IiBmaWxsPSIjMmExYTBhIi8+CiAgPHBhdGggZD0iTTQxNSAxMTQgUTQxOCAxMTcgNDIxIDExNCIgc3Ryb2tlPSIjY2M2NjQ0IiBzdHJva2Utd2lkdGg9IjEuNSIgZmlsbD0ibm9uZSIvPgogIDxyZWN0IHg9IjQzNSIgeT0iMTE1IiB3aWR0aD0iMjIiIGhlaWdodD0iMzAiIGZpbGw9IiNGRjZCNkIiIHJ4PSI0Ii8+CiAgPHJlY3QgeD0iNDIwIiB5PSIxMjUiIHdpZHRoPSIxMiIgaGVpZ2h0PSIyOCIgZmlsbD0iI0ZGOEM4QyIgcng9IjMiLz4KICA8ZWxsaXBzZSBjeD0iNDI4IiBjeT0iMTU1IiByeD0iOCIgcnk9IjQiIGZpbGw9IiNGRkQwQTAiLz4KICA8ZWxsaXBzZSBjeD0iNDQyIiBjeT0iMTU3IiByeD0iOCIgcnk9IjQiIGZpbGw9IiNGRkQwQTAiLz4KICA8bGluZSB4MT0iODAiIHkxPSIzNSIgeDI9Ijg0IiB5Mj0iNjAiIHN0cm9rZT0iIzVCOEZDOSIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjciLz4KICA8bGluZSB4MT0iMTQwIiB5MT0iMjUiIHgyPSIxNDQiIHkyPSI1MCIgc3Ryb2tlPSIjNUI4RkM5IiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNyIvPgogIDxsaW5lIHgxPSIyMDAiIHkxPSIzMCIgeDI9IjIwNCIgeTI9IjU1IiBzdHJva2U9IiM1QjhGQzkiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iMC43Ii8+CiAgPGxpbmUgeDE9IjQ2MCIgeTE9IjI4IiB4Mj0iNDY0IiB5Mj0iNTMiIHN0cm9rZT0iIzVCOEZDOSIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjciLz4KICA8bGluZSB4MT0iNTEwIiB5MT0iMjAiIHgyPSI1MTQiIHkyPSI0NSIgc3Ryb2tlPSIjNUI4RkM5IiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNyIvPgogIDxsaW5lIHgxPSI1NTAiIHkxPSIzMiIgeDI9IjU1NCIgeTI9IjU3IiBzdHJva2U9IiM1QjhGQzkiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iMC43Ii8+CiAgPGVsbGlwc2UgY3g9IjEwMCIgY3k9IjMwIiByeD0iNDAiIHJ5PSIyMiIgZmlsbD0iIzhBQUFCQiIgb3BhY2l0eT0iMC44Ii8+CiAgPGVsbGlwc2UgY3g9IjE2MCIgY3k9IjIwIiByeD0iNTUiIHJ5PSIyNiIgZmlsbD0iIzlCQkNDQyIgb3BhY2l0eT0iMC44Ii8+CiAgPGVsbGlwc2UgY3g9IjQ0MCIgY3k9IjI1IiByeD0iNTAiIHJ5PSIyNCIgZmlsbD0iIzhBQUFCQiIgb3BhY2l0eT0iMC44Ii8+CiAgPGVsbGlwc2UgY3g9IjUzMCIgY3k9IjE4IiByeD0iNDUiIHJ5PSIyMiIgZmlsbD0iIzlCQkNDQyIgb3BhY2l0eT0iMC44Ii8+CiAgPHJlY3QgeD0iMCIgeT0iMjIwIiB3aWR0aD0iNjAwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjN0E1ODAwIiByeD0iMiIvPgogIDxyZWN0IHg9IjMwIiB5PSIyMTUiIHdpZHRoPSI1NDAiIGhlaWdodD0iOCIgZmlsbD0iIzhCNjkxNCIgcng9IjIiLz4KPC9zdmc+",
+    sub:"Arrange the tiles to build the story",
+    sentences:[
+      { stage:0, tiles:["One","quiet","Saturday","morning",",","Faris","woke","up","to","the","smell","of","rain","."], answer:[["One","quiet","Saturday","morning",",","Faris","woke","up","to","the","smell","of","rain","."],["Faris","woke","up","to","the","smell","of","rain","one","quiet","Saturday","morning","."]] },
+      { stage:0, tiles:["He","pressed","his","face","against","the","cold","window","and","stared","at","the","grey","sky","."], answer:["He","pressed","his","face","against","the","cold","window","and","stared","at","the","grey","sky","."] },
+      { stage:0, tiles:["His","mother","had","promised","him","a","trip","to","the","park","today","."], answer:["His","mother","had","promised","him","a","trip","to","the","park","today","."] },
+      { stage:0, tiles:["Now",",","it","seemed","like","the","rain","would","ruin","everything","."], answer:[["Now",",","it","seemed","like","the","rain","would","ruin","everything","."],["It","seemed","like","the","rain","would","ruin","everything","now","."]] },
+      { stage:1, tiles:["Just","as","Faris","slumped","onto","the","sofa",",","his","little","sister","Nailah","burst","into","the","room","."], answer:[["Just","as","Faris","slumped","onto","the","sofa",",","his","little","sister","Nailah","burst","into","the","room","."],["His","little","sister","Nailah","burst","into","the","room","just","as","Faris","slumped","onto","the","sofa","."]] },
+      { stage:1, tiles:["<<","Come","quickly","!",">>","she","cried",",","tugging","at","his","sleeve","."], answer:["<<","Come","quickly","!",">>","she","cried",",","tugging","at","his","sleeve","."] },
+      { stage:1, tiles:["Faris","followed","her","to","the","backyard",",","where","a","small","brown","dog","was","whimpering","under","the","drain","cover","."], answer:["Faris","followed","her","to","the","backyard",",","where","a","small","brown","dog","was","whimpering","under","the","drain","cover","."] },
+      { stage:1, tiles:["Its","back","leg","was","caught","between","the","metal","bars",",","and","it","trembled","with","fear","."], answer:["Its","back","leg","was","caught","between","the","metal","bars",",","and","it","trembled","with","fear","."] },
+      { stage:2, tiles:["Faris","'s","heart","pounded","as","he","knelt","beside","the","frightened","animal","."], answer:["Faris","'s","heart","pounded","as","he","knelt","beside","the","frightened","animal","."] },
+      { stage:2, tiles:["<<","Hold","it","still",",",">>","he","told","Nailah",",","his","voice","steady","even","though","his","hands","shook","."], answer:["<<","Hold","it","still",",",">>","he","told","Nailah",",","his","voice","steady","even","though","his","hands","shook","."] },
+      { stage:2, tiles:["Carefully",",","he","pushed","the","metal","bar","to","one","side","and","eased","the","dog","'s","leg","free","."], answer:[["Carefully",",","he","pushed","the","metal","bar","to","one","side","and","eased","the","dog","'s","leg","free","."],["He","carefully","pushed","the","metal","bar","to","one","side","and","eased","the","dog","'s","leg","free","."]] },
+      { stage:2, tiles:["For","a","moment",",","everything","went","silent","—","then","the","dog","let","out","a","joyful","bark","."], answer:[["For","a","moment",",","everything","went","silent","—","then","the","dog","let","out","a","joyful","bark","."],["Everything","went","silent","for","a","moment","—","then","the","dog","let","out","a","joyful","bark","."]] },
+      { stage:3, tiles:["Faris","laughed","as","the","dog","licked","his","cheek","over","and","over","again","."], answer:["Faris","laughed","as","the","dog","licked","his","cheek","over","and","over","again","."] },
+      { stage:3, tiles:["He","had","forgotten","all","about","the","rain","—","this","had","turned","out","to","be","the","best","Saturday","ever","."], answer:["He","had","forgotten","all","about","the","rain","—","this","had","turned","out","to","be","the","best","Saturday","ever","."] },
+    ]
+  },
+
+  // ── STORY 1: The Wrong Bag ───────────────────────────────────────────────────
+  {
+    icon:"🎒", title:"The Wrong Bag", bgImage:"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgMzQwIj4KICA8cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjM0MCIgZmlsbD0iI0ZGRjhFOCIvPgogIDxyZWN0IHg9IjAiIHk9IjI2MCIgd2lkdGg9IjYwMCIgaGVpZ2h0PSI4MCIgZmlsbD0iI0Q0QTg0MyIvPgogIDxyZWN0IHg9IjAiIHk9IjI1NSIgd2lkdGg9IjYwMCIgaGVpZ2h0PSIxMiIgZmlsbD0iI0U4QkM1NSIvPgogIDxyZWN0IHg9IjIwIiB5PSI2MCIgd2lkdGg9IjE3MCIgaGVpZ2h0PSIxMTAiIGZpbGw9IiNGRkUwQjIiIHJ4PSI2Ii8+CiAgPHJlY3QgeD0iMjAiIHk9IjYwIiB3aWR0aD0iMTcwIiBoZWlnaHQ9IjExMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRThBMDIwIiBzdHJva2Utd2lkdGg9IjMiIHJ4PSI2Ii8+CiAgPHJlY3QgeD0iMjUiIHk9IjY1IiB3aWR0aD0iNzAiIGhlaWdodD0iMTAwIiBmaWxsPSJub25lIiBzdHJva2U9IiNFOEEwMjAiIHN0cm9rZS13aWR0aD0iMS41IiByeD0iMyIvPgogIDxyZWN0IHg9IjEwMCIgeT0iNjUiIHdpZHRoPSI4NSIgaGVpZ2h0PSIxMDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0U4QTAyMCIgc3Ryb2tlLXdpZHRoPSIxLjUiIHJ4PSIzIi8+CiAgPHJlY3QgeD0iMjEwIiB5PSIxMjAiIHdpZHRoPSIxNjAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRkY5QjZCIiByeD0iMTAiLz4KICA8cGF0aCBkPSJNMjEwIDE1NSBRMjkwIDExMCAzNzAgMTU1IiBmaWxsPSIjRkY3MDQzIiBzdHJva2U9Im5vbmUiLz4KICA8cmVjdCB4PSIyNDUiIHk9Ijk1IiB3aWR0aD0iOTAiIGhlaWdodD0iMzAiIGZpbGw9IiNGRjcwNDMiIHJ4PSI1Ii8+CiAgPHBhdGggZD0iTTI2NSA5NSBRMjkwIDc1IDMxNSA5NSIgZmlsbD0iI0ZGNTcyMiIgc3Ryb2tlPSJub25lIi8+CiAgPGVsbGlwc2UgY3g9IjI2OCIgY3k9IjEwOCIgcng9IjYiIHJ5PSI1IiBmaWxsPSIjRkZEREIzIi8+CiAgPGVsbGlwc2UgY3g9IjMxMiIgY3k9IjEwOCIgcng9IjYiIHJ5PSI1IiBmaWxsPSIjRkZEREIzIi8+CiAgPGVsbGlwc2UgY3g9IjI2OCIgY3k9IjEwNyIgcng9IjMiIHJ5PSIzLjUiIGZpbGw9IiNGRjZCMzUiLz4KICA8ZWxsaXBzZSBjeD0iMzEyIiBjeT0iMTA3IiByeD0iMyIgcnk9IjMuNSIgZmlsbD0iI0ZGNkIzNSIvPgogIDxlbGxpcHNlIGN4PSIyOTAiIGN5PSIxMjgiIHJ4PSIyMiIgcnk9IjE2IiBmaWxsPSIjRkZFMEEwIi8+CiAgPGNpcmNsZSBjeD0iMjgzIiBjeT0iMTIzIiByPSIzIiBmaWxsPSIjMmExYTAwIi8+CiAgPGNpcmNsZSBjeD0iMjk3IiBjeT0iMTIzIiByPSIzIiBmaWxsPSIjMmExYTAwIi8+CiAgPGNpcmNsZSBjeD0iMjg0IiBjeT0iMTIyIiByPSIxIiBmaWxsPSJ3aGl0ZSIvPgogIDxjaXJjbGUgY3g9IjI5OCIgY3k9IjEyMiIgcj0iMSIgZmlsbD0id2hpdGUiLz4KICA8ZWxsaXBzZSBjeD0iMjkwIiBjeT0iMTMyIiByeD0iNSIgcnk9IjMiIGZpbGw9IiNGRjk5OTkiLz4KICA8cGF0aCBkPSJNMjg1IDEzNiBRMjkwIDE0MCAyOTUgMTM2IiBzdHJva2U9IiNjYzQ0NDQiIHN0cm9rZS13aWR0aD0iMS41IiBmaWxsPSJub25lIi8+CiAgPGVsbGlwc2UgY3g9IjI3OCIgY3k9IjExOCIgcng9IjQiIHJ5PSIzIiBmaWxsPSIjRkY5OTk5IiBvcGFjaXR5PSIwLjciLz4KICA8ZWxsaXBzZSBjeD0iMzAyIiBjeT0iMTE4IiByeD0iNCIgcnk9IjMiIGZpbGw9IiNGRjk5OTkiIG9wYWNpdHk9IjAuNyIvPgogIDxwYXRoIGQ9Ik0yODIgMTE1IEwyNzUgMTEwIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPgogIDxwYXRoIGQ9Ik0yOTggMTE1IEwzMDUgMTEwIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPgogIDxlbGxpcHNlIGN4PSI0MjAiIGN5PSIyMDAiIHJ4PSI1MCIgcnk9IjYwIiBmaWxsPSIjRkZEREIzIi8+CiAgPGVsbGlwc2UgY3g9IjQyMCIgY3k9IjE3MCIgcng9IjI4IiByeT0iMzAiIGZpbGw9IiNGRkREQjMiLz4KICA8Y2lyY2xlIGN4PSI0MTAiIGN5PSIxNjIiIHI9IjQiIGZpbGw9IiMyYTFhMDAiLz4KICA8Y2lyY2xlIGN4PSI0MzAiIGN5PSIxNjIiIHI9IjQiIGZpbGw9IiMyYTFhMDAiLz4KICA8cGF0aCBkPSJNNDEyIDE3NSBRNDIwIDE4MCA0MjggMTc1IiBzdHJva2U9IiNjYzU1NDQiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgogIDxyZWN0IHg9IjQwMCIgeT0iMTk1IiB3aWR0aD0iNDAiIGhlaWdodD0iNTAiIGZpbGw9IiM2QkNCNzciIHJ4PSI1Ii8+CiAgPGVsbGlwc2UgY3g9IjQwNSIgY3k9IjI0OCIgcng9IjEyIiByeT0iNiIgZmlsbD0iI0ZGRERCMyIvPgogIDxlbGxpcHNlIGN4PSI0MzUiIGN5PSIyNDgiIHJ4PSIxMiIgcnk9IjYiIGZpbGw9IiNGRkREQjMiLz4KICA8ZWxsaXBzZSBjeD0iNTEwIiBjeT0iMjEwIiByeD0iNDAiIHJ5PSI1MCIgZmlsbD0iI0ZGQ0M5OSIvPgogIDxlbGxpcHNlIGN4PSI1MTAiIGN5PSIxODIiIHJ4PSIyMiIgcnk9IjI0IiBmaWxsPSIjRkZDQzk5Ii8+CiAgPGNpcmNsZSBjeD0iNTAyIiBjeT0iMTc2IiByPSIzLjUiIGZpbGw9IiMyYTFhMDAiLz4KICA8Y2lyY2xlIGN4PSI1MTgiIGN5PSIxNzYiIHI9IjMuNSIgZmlsbD0iIzJhMWEwMCIvPgogIDxwYXRoIGQ9Ik01MDQgMTg3IFE1MTAgMTgzIDUxNiAxODciIHN0cm9rZT0iI2NjNTU0NCIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiLz4KICA8cmVjdCB4PSI0OTIiIHk9IjIwNiIgd2lkdGg9IjM2IiBoZWlnaHQ9IjQ0IiBmaWxsPSIjRkY2QjZCIiByeD0iNSIvPgogIDxwYXRoIGQ9Ik0zNDAgODUgTDM1NSA2NSBMMzY1IDcwIiBzdHJva2U9IiNGRkQ5M0QiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgogIDxwYXRoIGQ9Ik00ODAgOTAgTDQ5NSA3MCBMNTA1IDc1IiBzdHJva2U9IiNGRkQ5M0QiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4=",
+    sub:"Arrange the tiles to build the story",
+    sentences:[
+      { stage:0, tiles:["It","was","a","busy","Monday","at","Riverside","Primary",",","and","the","canteen","was","packed","with","noise","."], answer:["It","was","a","busy","Monday","at","Riverside","Primary",",","and","the","canteen","was","packed","with","noise","."] },
+      { stage:0, tiles:["Vera","had","just","finished","her","chicken","rice","when","the","bell","rang","shrilly","."], answer:["Vera","had","just","finished","her","chicken","rice","when","the","bell","rang","shrilly","."] },
+      { stage:0, tiles:["She","grabbed","her","bag","from","under","the","bench","and","rushed","back","to","class","."], answer:["She","grabbed","her","bag","from","under","the","bench","and","rushed","back","to","class","."] },
+      { stage:0, tiles:["The","bag","felt","heavier","than","usual",",","but","she","did","not","stop","to","think","why","."], answer:["The","bag","felt","heavier","than","usual",",","but","she","did","not","stop","to","think","why","."] },
+      { stage:1, tiles:["In","the","middle","of","Maths",",","Vera","heard","a","faint","rustling","from","inside","her","bag","."], answer:[["In","the","middle","of","Maths",",","Vera","heard","a","faint","rustling","from","inside","her","bag","."],["Vera","heard","a","faint","rustling","from","inside","her","bag","in","the","middle","of","Maths","."]] },
+      { stage:1, tiles:["She","unzipped","it","slowly","—","and","found","herself","face","to","face","with","a","small","golden","hamster","."], answer:["She","unzipped","it","slowly","—","and","found","herself","face","to","face","with","a","small","golden","hamster","."] },
+      { stage:1, tiles:["Cahaya","and","Ritz","shrieked","and","scrambled","onto","their","chairs","."], answer:["Cahaya","and","Ritz","shrieked","and","scrambled","onto","their","chairs","."] },
+      { stage:1, tiles:["Mrs","Tan","dropped","her","marker","and","stared","in","disbelief","."], answer:["Mrs","Tan","dropped","her","marker","and","stared","in","disbelief","."] },
+      { stage:2, tiles:["Vera","cupped","the","hamster","gently","in","her","hands","before","it","could","scurry","away","."], answer:["Vera","cupped","the","hamster","gently","in","her","hands","before","it","could","scurry","away","."] },
+      { stage:2, tiles:["<<","This","is","not","my","bag","!",">>","she","gasped",",","her","face","burning","red","."], answer:["<<","This","is","not","my","bag","!",">>","she","gasped",",","her","face","burning","red","."] },
+      { stage:2, tiles:["The","whole","class","marched","to","the","general","office",",","with","Vera","cradling","the","hamster","at","the","front","."], answer:["The","whole","class","marched","to","the","general","office",",","with","Vera","cradling","the","hamster","at","the","front","."] },
+      { stage:2, tiles:["There",",","a","tearful","boy","from","Primary","Two","was","already","waiting","."], answer:[["There",",","a","tearful","boy","from","Primary","Two","was","already","waiting","."],["A","tearful","boy","from","Primary","Two","was","already","waiting","there","."]] },
+      { stage:2, tiles:["He","held","his","own","bag","in","one","hand","and","Vera","'s","water","bottle","in","the","other","."], answer:["He","held","his","own","bag","in","one","hand","and","Vera","'s","water","bottle","in","the","other","."] },
+      { stage:3, tiles:["The","boy","beamed","as","Vera","handed","back","his","hamster",",","safe","and","unharmed","."], answer:["The","boy","beamed","as","Vera","handed","back","his","hamster",",","safe","and","unharmed","."] },
+      { stage:3, tiles:["Vera","walked","back","to","class","with","the","right","bag","at","last","."], answer:["Vera","walked","back","to","class","with","the","right","bag","at","last","."] },
+      { stage:3, tiles:["She","was","already","laughing","at","the","story","she","would","tell","her","mother","."], answer:["She","was","already","laughing","at","the","story","she","would","tell","her","mother","."] },
+    ]
+  },
+
+  // ── STORY 2: Blackout ────────────────────────────────────────────────────────
+  {
+    icon:"🔦", title:"Blackout", bgImage:"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgMzQwIj4KICA8cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjM0MCIgZmlsbD0iIzFBMUEyRSIvPgogIDxyZWN0IHg9IjQwIiB5PSI0MCIgd2lkdGg9IjEzMCIgaGVpZ2h0PSI5MCIgZmlsbD0iIzBEMTExNyIgcng9IjQiLz4KICA8cmVjdCB4PSI0MCIgeT0iNDAiIHdpZHRoPSIxMzAiIGhlaWdodD0iOTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJBMkE0QSIgc3Ryb2tlLXdpZHRoPSIyIiByeD0iNCIvPgogIDxyZWN0IHg9IjIyMCIgeT0iNDAiIHdpZHRoPSIxMzAiIGhlaWdodD0iOTAiIGZpbGw9IiMwRDExMTciIHJ4PSI0Ii8+CiAgPHJlY3QgeD0iMjIwIiB5PSI0MCIgd2lkdGg9IjEzMCIgaGVpZ2h0PSI5MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMkEyQTRBIiBzdHJva2Utd2lkdGg9IjIiIHJ4PSI0Ii8+CiAgPHJlY3QgeD0iNDAwIiB5PSI0MCIgd2lkdGg9IjEzMCIgaGVpZ2h0PSI5MCIgZmlsbD0iIzBEMTExNyIgcng9IjQiLz4KICA8cmVjdCB4PSI0MDAiIHk9IjQwIiB3aWR0aD0iMTMwIiBoZWlnaHQ9IjkwIiBmaWxsPSJub25lIiBzdHJva2U9IiMyQTJBNEEiIHN0cm9rZS13aWR0aD0iMiIgcng9IjQiLz4KICA8cG9seWdvbiBwb2ludHM9IjI4MCw2MCAzMjAsNjAgMzQwLDM0MCAyNjAsMzQwIiBmaWxsPSIjRkZEOTNEIiBvcGFjaXR5PSIwLjE4Ii8+CiAgPHBvbHlnb24gcG9pbnRzPSIyODgsNjAgMzEyLDYwIDMyOCwzNDAgMjcyLDM0MCIgZmlsbD0iI0ZGRDkzRCIgb3BhY2l0eT0iMC4yMiIvPgogIDxyZWN0IHg9IjI3MCIgeT0iMTYwIiB3aWR0aD0iNjAiIGhlaWdodD0iODAiIGZpbGw9IiMyQTNBNUEiIHJ4PSI2Ii8+CiAgPGVsbGlwc2UgY3g9IjMwMCIgY3k9IjE1NSIgcng9IjI0IiByeT0iMjgiIGZpbGw9IiMzQTRBNkEiLz4KICA8ZWxsaXBzZSBjeD0iMjkxIiBjeT0iMTQ1IiByeD0iOSIgcnk9IjExIiBmaWxsPSIjNEE1QTdBIi8+CiAgPGVsbGlwc2UgY3g9IjMwOSIgY3k9IjE0NSIgcng9IjkiIHJ5PSIxMSIgZmlsbD0iIzRBNUE3QSIvPgogIDxjaXJjbGUgY3g9IjI5MSIgY3k9IjE0NCIgcj0iNCIgZmlsbD0iI0ZGRDkzRCIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iMzA5IiBjeT0iMTQ0IiByPSI0IiBmaWxsPSIjRkZEOTNEIiBvcGFjaXR5PSIwLjkiLz4KICA8Y2lyY2xlIGN4PSIyOTIiIGN5PSIxNDMiIHI9IjEuNSIgZmlsbD0id2hpdGUiLz4KICA8Y2lyY2xlIGN4PSIzMTAiIGN5PSIxNDMiIHI9IjEuNSIgZmlsbD0id2hpdGUiLz4KICA8ZWxsaXBzZSBjeD0iMzAwIiBjeT0iMTU4IiByeD0iOCIgcnk9IjUiIGZpbGw9IiM0QTVBN0EiLz4KICA8ZWxsaXBzZSBjeD0iMjg0IiBjeT0iMjQwIiByeD0iMTQiIHJ5PSI3IiBmaWxsPSIjMkEzQTVBIi8+CiAgPGVsbGlwc2UgY3g9IjMxNiIgY3k9IjI0MCIgcng9IjE0IiByeT0iNyIgZmlsbD0iIzJBM0E1QSIvPgogIDxlbGxpcHNlIGN4PSIxMTAiIGN5PSIyMjAiIHJ4PSI0MCIgcnk9IjUwIiBmaWxsPSIjMkEzMDQwIi8+CiAgPGVsbGlwc2UgY3g9IjExMCIgY3k9IjE5NSIgcng9IjIyIiByeT0iMjQiIGZpbGw9IiMyQTMwNDAiLz4KICA8ZWxsaXBzZSBjeD0iNDgwIiBjeT0iMjMwIiByeD0iNDAiIHJ5PSI0NSIgZmlsbD0iIzJBMjg0MCIvPgogIDxlbGxpcHNlIGN4PSI0ODAiIGN5PSIyMDciIHJ4PSIyMCIgcnk9IjIyIiBmaWxsPSIjMkEyODQwIi8+CiAgPHJlY3QgeD0iMTIwIiB5PSIwIiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjgiIGZpbGw9IiMzQTNBNUEiLz4KICA8ZWxsaXBzZSBjeD0iNDQwIiBjeT0iOCIgcng9IjE4IiByeT0iMjIiIGZpbGw9IiMyQTJBM0EiLz4KICA8ZWxsaXBzZSBjeD0iNDM0IiBjeT0iMCIgcng9IjUiIHJ5PSI3IiBmaWxsPSIjMUExQTJBIi8+CiAgPGVsbGlwc2UgY3g9IjQ0NiIgY3k9IjAiIHJ4PSI1IiByeT0iNyIgZmlsbD0iIzFBMUEyQSIvPgogIDxlbGxpcHNlIGN4PSI0NDAiIGN5PSIxNiIgcng9IjYiIHJ5PSI0IiBmaWxsPSIjM0EzQTRBIi8+CiAgPGNpcmNsZSBjeD0iNDMyIiBjeT0iMTAiIHI9IjIiIGZpbGw9IiNGRkQ5M0QiIG9wYWNpdHk9IjAuNiIvPgogIDxjaXJjbGUgY3g9IjQ0OCIgY3k9IjEwIiByPSIyIiBmaWxsPSIjRkZEOTNEIiBvcGFjaXR5PSIwLjYiLz4KICA8cGF0aCBkPSJNNDM0IDIwIFE0NDAgMjQgNDQ2IDIwIiBzdHJva2U9IiM1NTUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPgogIDxyZWN0IHg9IjI3MCIgeT0iNDgiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxNCIgZmlsbD0iI0ZGRDkzRCIgb3BhY2l0eT0iMC41IiByeD0iMyIvPgogIDxyZWN0IHg9IjI4NSIgeT0iNTAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIxMCIgZmlsbD0iI0ZGRDkzRCIgb3BhY2l0eT0iMC43IiByeD0iMiIvPgogIDxyZWN0IHg9IjAiIHk9IjMxMCIgd2lkdGg9IjYwMCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzJBMkEzQSIvPgogIDxyZWN0IHg9IjYwIiB5PSIyOTAiIHdpZHRoPSI4MCIgaGVpZ2h0PSIyNSIgZmlsbD0iIzFBMUEyQSIgcng9IjMiLz4KICA8cmVjdCB4PSIyMDAiIHk9IjI5MCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjI1IiBmaWxsPSIjMUExQTJBIiByeD0iMyIvPgogIDxyZWN0IHg9IjM0MCIgeT0iMjkwIiB3aWR0aD0iODAiIGhlaWdodD0iMjUiIGZpbGw9IiMxQTFBMkEiIHJ4PSIzIi8+CiAgPHJlY3QgeD0iNDYwIiB5PSIyOTAiIHdpZHRoPSI4MCIgaGVpZ2h0PSIyNSIgZmlsbD0iIzFBMUEyQSIgcng9IjMiLz4KPC9zdmc+",
+    sub:"Arrange the tiles to build the story",
+    sentences:[
+      { stage:0, tiles:["Jaden","sat","at","his","desk",",","pencil","in","hand",",","staring","at","the","blank","Science","test","paper","."], answer:["Jaden","sat","at","his","desk",",","pencil","in","hand",",","staring","at","the","blank","Science","test","paper","."] },
+      { stage:0, tiles:["The","classroom","hummed","with","the","sound","of","the","air","conditioner","and","the","scratching","of","pencils","."], answer:["The","classroom","hummed","with","the","sound","of","the","air","conditioner","and","the","scratching","of","pencils","."] },
+      { stage:0, tiles:["He","had","studied","hard","all","week",",","and","for","once",",","he","felt","ready","."], answer:["He","had","studied","hard","all","week",",","and","for","once",",","he","felt","ready","."] },
+      { stage:0, tiles:["Then",",","without","any","warning",",","every","light","in","the","school","went","out","."], answer:[["Then",",","without","any","warning",",","every","light","in","the","school","went","out","."],["Every","light","in","the","school","went","out","without","any","warning","."]] },
+      { stage:1, tiles:["The","class","erupted","in","gasps","and","nervous","laughter","."], answer:["The","class","erupted","in","gasps","and","nervous","laughter","."] },
+      { stage:1, tiles:["Mr","Lim","told","everyone","to","stay","calm",",","but","his","own","voice","sounded","uncertain","."], answer:["Mr","Lim","told","everyone","to","stay","calm",",","but","his","own","voice","sounded","uncertain","."] },
+      { stage:1, tiles:["Jaden","and","Kai","Lin","noticed","a","thin","beam","of","daylight","coming","from","the","ceiling","."], answer:["Jaden","and","Kai","Lin","noticed","a","thin","beam","of","daylight","coming","from","the","ceiling","."] },
+      { stage:1, tiles:["It","was","a","hatch","they","had","never","seen","before","."], answer:["It","was","a","hatch","they","had","never","seen","before","."] },
+      { stage:1, tiles:["Something","heavy","was","pressing","against","it","from","above",",","blocking","it","shut","."], answer:["Something","heavy","was","pressing","against","it","from","above",",","blocking","it","shut","."] },
+      { stage:2, tiles:["Jaden","climbed","onto","his","desk","and","pushed","the","hatch","open","with","both","hands","."], answer:["Jaden","climbed","onto","his","desk","and","pushed","the","hatch","open","with","both","hands","."] },
+      { stage:2, tiles:["On","the","rooftop",",","he","found","the","school","cat","."], answer:[["On","the","rooftop",",","he","found","the","school","cat","."],["He","found","the","school","cat","on","the","rooftop","."]] },
+      { stage:2, tiles:["It","was","curled","up","on","top","of","the","main","electrical","switch","box","."], answer:["It","was","curled","up","on","top","of","the","main","electrical","switch","box","."] },
+      { stage:2, tiles:["Its","weight","had","tripped","the","switch","and","cut","the","power","to","the","whole","building","."], answer:["Its","weight","had","tripped","the","switch","and","cut","the","power","to","the","whole","building","."] },
+      { stage:2, tiles:["Jaden","lifted","the","cat","gently","aside","and","flipped","the","switch","back","on","."], answer:["Jaden","lifted","the","cat","gently","aside","and","flipped","the","switch","back","on","."] },
+      { stage:3, tiles:["The","lights","flickered","and","flooded","back","on",",","and","a","cheer","rang","through","every","classroom","."], answer:["The","lights","flickered","and","flooded","back","on",",","and","a","cheer","rang","through","every","classroom","."] },
+      { stage:3, tiles:["Jaden","climbed","back","to","his","seat","and","picked","up","his","pencil",",","grinning","."], answer:["Jaden","climbed","back","to","his","seat","and","picked","up","his","pencil",",","grinning","."] },
+      { stage:3, tiles:["He","had","ten","minutes","left","and","every","answer","in","his","head","."], answer:["He","had","ten","minutes","left","and","every","answer","in","his","head","."] },
+    ]
+  }
+];
+
+const EASY_STORIES = [
+  // ── STORY 0: Faris's Best Saturday (Simple) ─────────────────────────────
+  {
+    icon:"🌧️", title:"Faris's Best Saturday",
+    sub:"Put the words in order to build the story",
+    bgColor:"#4A90D9",
+    sentences:[
+      { stage:0, tiles:["It","was","a","rainy","Saturday","morning","."], answer:["It","was","a","rainy","Saturday","morning","."] },
+      { stage:0, tiles:["Faris","looked","out","the","window","and","frowned","."], answer:["Faris","looked","out","the","window","and","frowned","."] },
+      { stage:0, tiles:["Big","grey","clouds","filled","the","sky","."], answer:["Big","grey","clouds","filled","the","sky","."] },
+      { stage:0, tiles:["His","mother","had","said","they","could","go","to","the","park","."], answer:["His","mother","had","said","they","could","go","to","the","park","."] },
+      { stage:0, tiles:["Now","the","rain","had","spoilt","his","plans","."], answer:["Now","the","rain","had","spoilt","his","plans","."] },
+      { stage:1, tiles:["His","sister","Nailah","ran","into","the","room","."], answer:["His","sister","Nailah","ran","into","the","room","."] },
+      { stage:1, tiles:["She","pulled","his","arm","and","cried","for","help","."], answer:["She","pulled","his","arm","and","cried","for","help","."] },
+      { stage:1, tiles:["In","the","backyard",",","a","small","dog","was","whimpering","."], answer:[["In","the","backyard",",","a","small","dog","was","whimpering","."],["A","small","dog","was","whimpering","in","the","backyard","."]] },
+      { stage:1, tiles:["Its","leg","was","stuck","under","the","drain","cover","."], answer:["Its","leg","was","stuck","under","the","drain","cover","."] },
+      { stage:1, tiles:["The","dog","looked","scared","and","could","not","get","free","."], answer:["The","dog","looked","scared","and","could","not","get","free","."] },
+      { stage:2, tiles:["Faris","knelt","down","beside","the","dog","."], answer:["Faris","knelt","down","beside","the","dog","."] },
+      { stage:2, tiles:["His","hands","shook","but","he","did","not","give","up","."], answer:["His","hands","shook","but","he","did","not","give","up","."] },
+      { stage:2, tiles:["He","pushed","the","cover","aside","and","freed","its","leg","."], answer:["He","pushed","the","cover","aside","and","freed","its","leg","."] },
+      { stage:2, tiles:["The","dog","jumped","up","and","wagged","its","tail","."], answer:["The","dog","jumped","up","and","wagged","its","tail","."] },
+      { stage:2, tiles:["Nailah","clapped","her","hands","and","jumped","for","joy","."], answer:["Nailah","clapped","her","hands","and","jumped","for","joy","."] },
+      { stage:3, tiles:["The","dog","licked","Faris","on","the","cheek","."], answer:["The","dog","licked","Faris","on","the","cheek","."] },
+      { stage:3, tiles:["Faris","laughed","and","hugged","the","little","dog","."], answer:["Faris","laughed","and","hugged","the","little","dog","."] },
+      { stage:3, tiles:["He","forgot","all","about","the","rain","."], answer:["He","forgot","all","about","the","rain","."] },
+      { stage:3, tiles:["Faris","gave","the","dog","some","water","to","drink","."], answer:["Faris","gave","the","dog","some","water","to","drink","."] },
+      { stage:3, tiles:["His","mother","came","out","and","smiled","at","them","."], answer:["His","mother","came","out","and","smiled","at","them","."] },
+      { stage:3, tiles:["She","said","they","could","keep","the","dog","."], answer:["She","said","they","could","keep","the","dog","."] },
+      { stage:3, tiles:["Faris","could","not","believe","his","luck","!"], answer:["Faris","could","not","believe","his","luck","!"] },
+      { stage:3, tiles:["Faris","named","the","dog","Rainy","."], answer:["Faris","named","the","dog","Rainy","."] },
+      { stage:3, tiles:["Rainy","slept","on","his","bed","that","very","night","."], answer:["Rainy","slept","on","his","bed","that","very","night","."] },
+      { stage:3, tiles:["It","was","the","best","Saturday","ever","!"], answer:["It","was","the","best","Saturday","ever","!"] },
+    ]
+  },
+
+  // ── STORY 1: The Wrong Bag (Simple) ─────────────────────────────────────
+  {
+    icon:"🎒", title:"The Wrong Bag",
+    sub:"Put the words in order to build the story",
+    bgColor:"#E8A020",
+    sentences:[
+      { stage:0, tiles:["It","was","a","busy","Monday","at","school","."], answer:["It","was","a","busy","Monday","at","school","."] },
+      { stage:0, tiles:["The","canteen","was","full","of","noise","and","people","."], answer:["The","canteen","was","full","of","noise","and","people","."] },
+      { stage:0, tiles:["Vera","finished","her","chicken","rice","quickly","."], answer:["Vera","finished","her","chicken","rice","quickly","."] },
+      { stage:0, tiles:["The","bell","rang","and","she","grabbed","her","bag","."], answer:["The","bell","rang","and","she","grabbed","her","bag","."] },
+      { stage:0, tiles:["The","bag","felt","much","heavier","than","usual","."], answer:["The","bag","felt","much","heavier","than","usual","."] },
+      { stage:1, tiles:["In","class",",","Vera","heard","a","strange","sound","."], answer:[["In","class",",","Vera","heard","a","strange","sound","."],["Vera","heard","a","strange","sound","in","class","."]] },
+      { stage:1, tiles:["It","was","coming","from","inside","her","bag","!"], answer:["It","was","coming","from","inside","her","bag","!"] },
+      { stage:1, tiles:["She","slowly","opened","the","zip","and","looked","inside","."], answer:["She","slowly","opened","the","zip","and","looked","inside","."] },
+      { stage:1, tiles:["A","small","golden","hamster","looked","back","at","her","!"], answer:["A","small","golden","hamster","looked","back","at","her","!"] },
+      { stage:1, tiles:["The","bag","was","not","hers","at","all","!"], answer:["The","bag","was","not","hers","at","all","!"] },
+      { stage:2, tiles:["Cahaya","and","Ritz","screamed","and","jumped","onto","their","chairs","."], answer:["Cahaya","and","Ritz","screamed","and","jumped","onto","their","chairs","."] },
+      { stage:2, tiles:["Vera","kept","calm","and","held","the","hamster","gently","."], answer:["Vera","kept","calm","and","held","the","hamster","gently","."] },
+      { stage:2, tiles:["She","walked","to","the","general","office","with","it","."], answer:["She","walked","to","the","general","office","with","it","."] },
+      { stage:2, tiles:["A","boy","from","Primary","Two","was","already","there","."], answer:["A","boy","from","Primary","Two","was","already","there","."] },
+      { stage:3, tiles:["The","hamster","was","his","!"], answer:["The","hamster","was","his","!"] },
+      { stage:3, tiles:["Vera","gave","it","back","and","the","boy","smiled","."], answer:["Vera","gave","it","back","and","the","boy","smiled","."] },
+      { stage:3, tiles:["Vera","got","her","own","bag","back","too","."], answer:["Vera","got","her","own","bag","back","too","."] },
+      { stage:3, tiles:["She","walked","back","to","class","and","laughed","to","herself","."], answer:["She","walked","back","to","class","and","laughed","to","herself","."] },
+      { stage:3, tiles:["It","was","a","day","she","would","never","forget","!"], answer:["It","was","a","day","she","would","never","forget","!"] },
+      { stage:3, tiles:["She","told","her","friends","the","story","at","recess","."], answer:["She","told","her","friends","the","story","at","recess","."] },
+      { stage:3, tiles:["They","all","laughed","when","they","heard","about","the","hamster","."], answer:["They","all","laughed","when","they","heard","about","the","hamster","."] },
+      { stage:3, tiles:["Vera","thought","it","was","funny","too","."], answer:["Vera","thought","it","was","funny","too","."] },
+      { stage:3, tiles:["She","would","always","check","her","bag","from","now","on","!"], answer:["She","would","always","check","her","bag","from","now","on","!"] },
+      { stage:3, tiles:["What","a","Monday","it","had","been","!"], answer:["What","a","Monday","it","had","been","!"] },
+    ]
+  },
+
+  // ── STORY 2: Blackout (Simple) ──────────────────────────────────────────
+  {
+    icon:"🔦", title:"Blackout",
+    sub:"Put the words in order to build the story",
+    bgColor:"#2A2A5A",
+    sentences:[
+      { stage:0, tiles:["Jaden","sat","at","his","desk","in","class","."], answer:["Jaden","sat","at","his","desk","in","class","."] },
+      { stage:0, tiles:["He","was","doing","a","Science","test","."], answer:["He","was","doing","a","Science","test","."] },
+      { stage:0, tiles:["He","had","studied","hard","and","felt","ready","."], answer:["He","had","studied","hard","and","felt","ready","."] },
+      { stage:0, tiles:["Then","all","the","lights","went","out","!"], answer:["Then","all","the","lights","went","out","!"] },
+      { stage:1, tiles:["The","class","was","dark","and","very","noisy","."], answer:["The","class","was","dark","and","very","noisy","."] },
+      { stage:1, tiles:["Mr","Lim","told","them","to","stay","calm","."], answer:["Mr","Lim","told","them","to","stay","calm","."] },
+      { stage:1, tiles:["Jaden","saw","a","thin","beam","of","light","above","him","."], answer:["Jaden","saw","a","thin","beam","of","light","above","him","."] },
+      { stage:1, tiles:["Kai","Lin","pointed","at","a","hatch","in","the","ceiling","."], answer:["Kai","Lin","pointed","at","a","hatch","in","the","ceiling","."] },
+      { stage:1, tiles:["Something","heavy","was","sitting","on","top","of","it","."], answer:["Something","heavy","was","sitting","on","top","of","it","."] },
+      { stage:2, tiles:["Jaden","climbed","up","and","pushed","the","hatch","open","."], answer:["Jaden","climbed","up","and","pushed","the","hatch","open","."] },
+      { stage:2, tiles:["He","saw","the","school","cat","on","the","roof","."], answer:["He","saw","the","school","cat","on","the","roof","."] },
+      { stage:2, tiles:["The","cat","was","sitting","on","the","power","switch","."], answer:["The","cat","was","sitting","on","the","power","switch","."] },
+      { stage:2, tiles:["Jaden","moved","the","cat","and","flipped","the","switch","."], answer:["Jaden","moved","the","cat","and","flipped","the","switch","."] },
+      { stage:3, tiles:["The","lights","flickered","and","came","back","on","!"], answer:["The","lights","flickered","and","came","back","on","!"] },
+      { stage:3, tiles:["Everyone","in","the","school","cheered","."], answer:["Everyone","in","the","school","cheered","."] },
+      { stage:3, tiles:["Jaden","climbed","back","to","his","seat","and","grinned","."], answer:["Jaden","climbed","back","to","his","seat","and","grinned","."] },
+      { stage:3, tiles:["He","still","had","time","to","finish","his","test","!"], answer:["He","still","had","time","to","finish","his","test","!"] },
+      { stage:3, tiles:["Mr","Lim","gave","him","a","thumbs","up","."], answer:["Mr","Lim","gave","him","a","thumbs","up","."] },
+      { stage:3, tiles:["Kai","Lin","whispered","that","Jaden","was","a","hero","."], answer:["Kai","Lin","whispered","that","Jaden","was","a","hero","."] },
+      { stage:3, tiles:["Jaden","finished","his","test","and","put","his","pencil","down","."], answer:["Jaden","finished","his","test","and","put","his","pencil","down","."] },
+      { stage:3, tiles:["It","had","been","the","strangest","test","he","ever","took","!"], answer:["It","had","been","the","strangest","test","he","ever","took","!"] },
+      { stage:3, tiles:["After","school",",","everyone","talked","about","what","Jaden","had","done","."], answer:[["After","school",",","everyone","talked","about","what","Jaden","had","done","."],["Everyone","talked","about","what","Jaden","had","done","after","school","."]] },
+      { stage:3, tiles:["He","was","the","hero","of","the","day","!"], answer:["He","was","the","hero","of","the","day","!"] },
+      { stage:3, tiles:["What","a","day","it","had","been","!"], answer:["What","a","day","it","had","been","!"] },
+    ]
+  }
+];
+
+let currentLevel = "easy"; // "easy" or "intermediate"
+let STORIES = EASY_STORIES;
+let activeStory=null, currentIdx=0, placed=[], completedLines=[], completedWC=0;
+let tryCount=0, answerSeen=false;
+let bankDragSrc=null, dzDragIdx=null;
+
+
+// ── LEVEL SWITCHING ───────────────────────────────────────────────────────────
+function askLevelSwitch(){
+  const goingUp = currentLevel === 'easy';
+  document.getElementById('modal-icon').textContent   = goingUp ? '🚀' : '⭐';
+  document.getElementById('modal-title').textContent  = goingUp ? 'Ready for Intermediate?' : 'Switch to Easy?';
+  document.getElementById('modal-msg').textContent    = goingUp
+    ? 'The Intermediate stories have longer sentences and harder words. Give it a go!'
+    : 'The Easy stories have shorter, simpler sentences. Switch back anytime!';
+  document.getElementById('level-modal').style.display = 'flex';
+}
+
+function closeLevelModal(){
+  document.getElementById('level-modal').style.display = 'none';
+}
+
+function confirmLevelSwitch(){
+  closeLevelModal();
+  if(currentLevel === 'easy'){
+    currentLevel = 'intermediate';
+    STORIES = INTER_STORIES;
+    document.getElementById('level-banner').style.background = '#E8F8EE';
+    document.getElementById('level-banner').style.borderColor = '#6BCB77';
+    document.getElementById('level-banner').querySelector('p').textContent = '🚀 You are on the Intermediate level';
+    document.getElementById('level-banner').querySelector('p').style.color = '#085041';
+    document.getElementById('level-banner').querySelectorAll('p')[1].textContent = 'Want to go back to easier stories?';
+    document.getElementById('level-banner').querySelectorAll('p')[1].style.color = '#1a7a3a';
+    document.getElementById('level-toggle-btn').textContent = '⭐ Switch to Easy';
+    document.getElementById('level-toggle-btn').style.background = '#6BCB77';
+    document.getElementById('level-toggle-btn').style.borderColor = '#6BCB77';
+  } else {
+    currentLevel = 'easy';
+    STORIES = EASY_STORIES;
+    document.getElementById('level-banner').style.background = '#FFF3CD';
+    document.getElementById('level-banner').style.borderColor = '#FFD93D';
+    document.getElementById('level-banner').querySelector('p').textContent = '⭐ You are on the Easy level';
+    document.getElementById('level-banner').querySelector('p').style.color = '#5a3e00';
+    document.getElementById('level-banner').querySelectorAll('p')[1].textContent = 'Ready for a challenge? Try the Intermediate stories!';
+    document.getElementById('level-banner').querySelectorAll('p')[1].style.color = '#856404';
+    document.getElementById('level-toggle-btn').textContent = '🚀 Intermediate';
+    document.getElementById('level-toggle-btn').style.background = '#FF6B6B';
+    document.getElementById('level-toggle-btn').style.borderColor = '#FF6B6B';
+  }
+  // Update story cards
+  renderPickerCards();
+}
+
+function renderPickerCards(){
+  const grid = document.querySelector('.story-cards');
+  grid.innerHTML = STORIES.map((s,i) => `
+    <button class="story-card-btn" onclick="startStory(${i})">
+      <div class="story-card-img">${s.icon}${i===0?'🐶':i===1?'🐹':'😱'}</div>
+      <div class="story-card-body">
+        <h3>${s.title}</h3>
+        <p>${s.sub}</p>
+        <span class="story-card-tag">${s.sentences.length} sentences · ${currentLevel === 'easy' ? 'easy' : 'intermediate'} level</span>
+      </div>
+    </button>`).join('');
+}
+
+function shuffle(arr){ let a=[...arr]; for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function startStory(idx){
+  activeStory=STORIES[idx]; currentIdx=0; placed=[]; completedLines=[]; completedWC=0;
+  document.getElementById('picker-screen').style.display='none';
+  document.getElementById('game-screen').style.display='block';
+  document.getElementById('hdr-icon').textContent=activeStory.icon;
+  document.getElementById('hdr-title').textContent=activeStory.title;
+  document.getElementById('hdr-sub').textContent=activeStory.sub;
+  document.getElementById('game-header-bg').style.background=activeStory.bgColor;
+  updateProgress(); renderTabs(); renderSentence();
+}
+
+function goBack(){
+  document.getElementById('game-screen').style.display='none';
+  document.getElementById('picker-screen').style.display='block';
+}
+
+function renderTabs(){
+  const tabs=document.getElementById('stage-tabs');
+  tabs.innerHTML=STAGES.map((s,i)=>{
+    const items=activeStory.sentences.filter(x=>x.stage===i);
+    const firstIdx=activeStory.sentences.findIndex(x=>x.stage===i);
+    const allDone=items.every((_,k)=>completedLines[firstIdx+k]);
+    const isCurrent=currentIdx<activeStory.sentences.length && activeStory.sentences[currentIdx].stage===i;
+    let cls='stage-tab'+(isCurrent?' active':allDone?' done':'');
+    const dis=(!isCurrent&&!allDone&&firstIdx>currentIdx)?'disabled':'';
+    return `<button class="${cls}" ${dis} onclick="jumpStage(${i})">${s.name}${allDone?' ✓':''}</button>`;
+  }).join('');
+}
+
+function jumpStage(s){
+  const firstIdx=activeStory.sentences.findIndex(x=>x.stage===s);
+  const items=activeStory.sentences.filter(x=>x.stage===s);
+  const allDone=items.every((_,k)=>completedLines[firstIdx+k]);
+  if(activeStory.sentences[currentIdx]&&activeStory.sentences[currentIdx].stage===s) return;
+  if(allDone){ currentIdx=firstIdx; placed=[]; renderSentence(); }
+}
+
+function renderSentence(){
+  if(currentIdx>=activeStory.sentences.length){ showComplete(); return; }
+  const item=activeStory.sentences[currentIdx];
+  const shuffled=shuffle(item.tiles);
+  document.getElementById('main-area').innerHTML=`
+    <div class="main-card">
+      <div class="prompt-strip">${STAGES[item.stage].prompt}</div>
+      <p class="section-label">Click the words in order 👇</p>
+      <div class="tile-bank" id="tile-bank">${shuffled.map((w,i)=>`<button class="tile" data-word="${w}" id="st-${i}">${w}</button>`).join('')}</div>
+      <p class="section-label" style="margin-top:10px;">Your sentence</p>
+      <div class="drop-zone" id="drop-zone"><span class="drop-zone-empty">Click words above to place them here</span></div>
+      <div class="hint-box info" id="hint-box"></div>
+      <div class="btn-row">
+        <button class="btn primary" onclick="checkSentence()">✓ Check</button>
+        <button class="btn" onclick="clearDZ()">↺ Clear</button>
+      </div>
+    </div>`;
+  placed=[]; tryCount=0; answerSeen=false;
+  updateProgress(); renderTabs(); attachEvents();
+}
+
+function attachEvents(){
+  document.querySelectorAll('.tile').forEach(t=>{
+    t.addEventListener('click',()=>{
+      if(!t.classList.contains('used')){ placed.push({word:t.dataset.word,el:t}); t.classList.add('used'); updateDZ(); setHint('','info'); }
+    });
+    t.setAttribute('draggable','true');
+    t.addEventListener('dragstart',e=>{ bankDragSrc=t; dzDragIdx=null; e.dataTransfer.effectAllowed='copy'; e.dataTransfer.setData('text/plain','bank'); });
+    t.addEventListener('dragend',()=>{ bankDragSrc=null; });
+  });
+  const dz=document.getElementById('drop-zone');
+  dz.addEventListener('dragover',e=>{ e.preventDefault(); const tgt=e.target.closest('.placed-tile'); document.querySelectorAll('.placed-tile').forEach(el=>el.classList.remove('dz-over')); if(tgt) tgt.classList.add('dz-over'); else dz.classList.add('over'); });
+  dz.addEventListener('dragleave',e=>{ if(!dz.contains(e.relatedTarget)){ dz.classList.remove('over'); document.querySelectorAll('.placed-tile').forEach(el=>el.classList.remove('dz-over')); } });
+  dz.addEventListener('drop',e=>{
+    e.preventDefault(); dz.classList.remove('over'); document.querySelectorAll('.placed-tile').forEach(el=>el.classList.remove('dz-over'));
+    const tgt=e.target.closest('.placed-tile'); const tgtIdx=tgt?parseInt(tgt.dataset.pidx):placed.length;
+    if(bankDragSrc&&!bankDragSrc.classList.contains('used')){ const ne={word:bankDragSrc.dataset.word,el:bankDragSrc}; bankDragSrc.classList.add('used'); placed.splice(tgtIdx,0,ne); updateDZ(); setHint('','info'); }
+    else if(dzDragIdx!==null&&dzDragIdx!==tgtIdx){ const mv=placed.splice(dzDragIdx,1)[0]; placed.splice(dzDragIdx<tgtIdx?tgtIdx-1:tgtIdx,0,mv); updateDZ(); setHint('','info'); }
+    bankDragSrc=null; dzDragIdx=null;
+  });
+}
+
+function updateDZ(){
+  const dz=document.getElementById('drop-zone');
+  if(placed.length===0){ dz.innerHTML='<span class="drop-zone-empty">Click words above to place them here</span>'; return; }
+  dz.innerHTML=placed.map((p,i)=>`<button class="placed-tile" draggable="true" data-pidx="${i}" ondragstart="dzTileDragStart(event,${i})" ondragend="dzTileDragEnd(event)" onclick="removePlaced(${i})" title="Click to remove">${p.word}</button>`).join('');
+}
+
+function dzTileDragStart(e,idx){ dzDragIdx=idx; bankDragSrc=null; e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain','dz'); e.currentTarget.style.opacity='0.4'; }
+function dzTileDragEnd(e){ e.currentTarget.style.opacity=''; dzDragIdx=null; document.querySelectorAll('.placed-tile').forEach(el=>el.classList.remove('dz-over')); }
+function removePlaced(idx){ if(dzDragIdx!==null) return; placed[idx].el.classList.remove('used'); placed.splice(idx,1); updateDZ(); setHint('','info'); }
+function clearDZ(){ placed.forEach(p=>p.el.classList.remove('used')); placed=[]; updateDZ(); setHint('','info'); }
+function setHint(msg,type){
+  const h=document.getElementById('hint-box'); if(!h) return;
+  h.className='hint-box '+type; h.style.flexDirection=''; h.style.alignItems=''; h.textContent=msg;
+}
+
+function checkSentence(){
+  const rawAnswer=activeStory.sentences[currentIdx].answer;
+  const answers=Array.isArray(rawAnswer[0])?rawAnswer:[rawAnswer];
+  const words=placed.map(p=>p.word);
+  if(words.length===0){ setHint('Click some words first!','info'); return; }
+  const correct=answers.some(ans=>words.length===ans.length&&words.every((w,i)=>w===ans[i]));
+  if(correct){
+    setHint(answerSeen?'✅ Good job! You got it!':'⭐ Well done! That is correct!','right');
+    const line=words.join(' ').replace(/ ([,\.!?])/g,'$1').replace(/ '/g,"'").replace(/ —/g,'—');
+    completedLines[currentIdx]=line;
+    completedWC=completedLines.filter(Boolean).reduce((s,l)=>s+l.split(' ').length,0);
+    updateStory(); updateProgress();
+    setTimeout(()=>{ currentIdx++; placed=[]; renderSentence(); },950);
+  } else {
+    tryCount++;
+    let msg='';
+    if(words.length<answers[0].length) msg=`You need ${answers[0].length-words.length} more word(s).`;
+    else if(words.length>answers[0].length) msg='Too many words! Try removing some.';
+    else { const f=words.findIndex((w,i)=>w!==answers[0][i]); msg=`Check word ${f+1} — try again!`; }
+    if(tryCount>=1&&!answerSeen){ setHint(msg+' Tap 👁 See Answer for help.','wrong'); showSeeAnswerBtn(); }
+    else { setHint(msg,'wrong'); }
+  }
+}
+
+function showSeeAnswerBtn(){
+  if(document.getElementById('see-answer-btn')) return;
+  const btnRow=document.querySelector('.btn-row');
+  const btn=document.createElement('button');
+  btn.id='see-answer-btn'; btn.className='btn';
+  btn.style.borderColor='#E8A020'; btn.style.color='#854F0B';
+  btn.textContent='👁 See Answer'; btn.onclick=revealAnswer;
+  btnRow.appendChild(btn);
+}
+
+function revealAnswer(){
+  answerSeen=true;
+  const rawAnswer=activeStory.sentences[currentIdx].answer;
+  const answer=Array.isArray(rawAnswer[0])?rawAnswer[0]:rawAnswer;
+  const line=answer.join(' ').replace(/ ([,\.!?])/g,'$1').replace(/ '/g,"'").replace(/ —/g,'—');
+  const btn=document.getElementById('see-answer-btn');
+  if(btn){ btn.textContent='👁 Answer shown above'; btn.style.opacity='0.6'; btn.onclick=null; }
+  placed.forEach(p=>p.el.classList.remove('used')); placed=[]; updateDZ();
+  const h=document.getElementById('hint-box');
+  h.className='hint-box info'; h.style.flexDirection='column'; h.style.alignItems='flex-start'; h.style.gap='4px';
+  h.innerHTML='<strong style="font-size:17px;">Answer:</strong>'
+    +'<em style="font-size:20px; color:#1a1a2e; line-height:1.7;">'+line+'</em>'
+    +'<span style="font-size:15px; color:#888;">Now put the words in the same order.</span>';
+}
+
+const STAGE_NAMES=["Beginning","Build-up","Climax","Resolution"];
+function updateStory(){
+  const preview=document.getElementById('story-preview');
+  if(completedLines.filter(Boolean).length===0){ preview.innerHTML='<em style="color:#ccc;">Your story will appear here...</em>'; return; }
+  const paras=[[],[],[],[]];
+  completedLines.forEach((line,i)=>{ if(line) paras[activeStory.sentences[i].stage].push(line); });
+  preview.innerHTML=paras.map((para,si)=>para.length===0?'':
+    `<div class="story-para"><span class="para-label s${si}">${STAGE_NAMES[si]}</span><br>${para.join(' ')}</div>`
+  ).filter(Boolean).join('');
+  document.getElementById('wc-note').textContent=`Word count: ~${completedWC}`;
+}
+
+function updateProgress(){
+  if(!activeStory) return;
+  const done=completedLines.filter(Boolean).length, total=activeStory.sentences.length;
+  document.getElementById('bar-fill').style.width=Math.round(done/total*100)+'%';
+  document.getElementById('progress-label').textContent=currentIdx<total?`Sentence ${currentIdx+1} of ${total}`:'All done!';
+  document.getElementById('wc-label').textContent=`Words: ~${completedWC}`;
+}
+
+function showComplete(){
+  document.getElementById('stage-tabs').innerHTML='';
+  document.getElementById('main-area').innerHTML=`<div class="complete-banner"><h2>🎉 You finished the story!</h2><p>Amazing work! Read your full story below.</p></div>`;
+  document.getElementById('bar-fill').style.width='100%';
+  document.getElementById('progress-label').textContent='All done!';
+}
+</script>
+
+<!-- LEVEL SWITCH MODAL -->
+<div id="level-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:20px; padding:32px 28px; max-width:380px; width:90%; text-align:center; box-shadow:0 12px 40px rgba(0,0,0,0.25);">
+    <div id="modal-icon" style="font-size:52px; margin-bottom:12px;">🚀</div>
+    <h2 id="modal-title" style="font-size:22px; font-weight:900; margin-bottom:8px; color:#1a1a2e;">Ready for Intermediate?</h2>
+    <p id="modal-msg" style="font-size:15px; color:#666; font-weight:600; line-height:1.6; margin-bottom:24px;">The Intermediate stories have longer sentences and harder words. Give it a go!</p>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <button id="modal-confirm-btn" onclick="confirmLevelSwitch()" style="padding:11px 28px; border-radius:10px; border:none; background:#FF6B6B; color:#fff; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit;">Yes, let's go!</button>
+      <button onclick="closeLevelModal()" style="padding:11px 28px; border-radius:10px; border:2.5px solid #ddd; background:#fff; color:#555; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit;">Not yet</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
